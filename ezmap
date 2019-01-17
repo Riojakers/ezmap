@@ -15,7 +15,7 @@ def main(target):
     for port in commonPorts:
         sc.simpleTCP(target,port)
 
-        # escaners medios
+        # escaners medios dsjoaghladsglkadsg
 
 
 if __name__ == '__main__':
