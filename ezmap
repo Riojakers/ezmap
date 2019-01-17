@@ -6,18 +6,18 @@ from scan import Scanner
 # Base de datos donde se guardan los puertos abiertos
 dbTCP = {}
 dbUDP = {}
-commonPorts = ('80','443','21','22','25','80','110','143','443','587','3306','27017')
+commonPorts = ('135','902','80','443','21','22','25','80','110','143','443','587','3306','27017')
 
 def main(target):
 
     sc = Scanner()
     
     for port in commonPorts:
-        sc.medioTCP(target,port)
+        sc.simpleTCP(target,port)
 
         # escaners medios
 
 
 if __name__ == '__main__':
-    target = "localhost"
+    target = '127.0.0.1'
     main(target)

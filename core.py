@@ -666,6 +666,70 @@ class PortScanner(object):
 
 ############################################################################
 
+def csv(self):
+        """
+        returns CSV output as text
+
+        Example :
+        host;hostname;hostname_type;protocol;port;name;state;product;extrainfo;reason;version;conf;cpe
+        127.0.0.1;localhost;PTR;tcp;22;ssh;open;OpenSSH;protocol 2.0;syn-ack;5.9p1 Debian 5ubuntu1;10;cpe
+        127.0.0.1;localhost;PTR;tcp;23;telnet;closed;;;conn-refused;;3;
+        127.0.0.1;localhost;PTR;tcp;24;priv-mail;closed;;;conn-refused;;3;
+        """
+        assert 'scan' in self._scan_result, 'Do a scan before trying to get result !'
+
+        if sys.version_info < (3, 0):
+            fd = io.BytesIO()
+        else:
+            fd = io.StringIO()
+
+        csv_ouput = csv.writer(fd, delimiter=';')
+        csv_header = [
+            'host',
+            'hostname',
+            'hostname_type',
+            'protocol',
+            'port',
+            'name',
+            'state',
+            'product',
+            'extrainfo',
+            'reason',
+            'version',
+            'conf',
+            'cpe'
+            ]
+
+        csv_ouput.writerow(csv_header)
+
+        for host in self.all_hosts():
+            for proto in self[host].all_protocols():
+                if proto not in ['tcp', 'udp']:
+                    continue
+                lport = list(self[host][proto].keys())
+                lport.sort()
+                for port in lport:
+                    hostname = ''
+                    for h in self[host]['hostnames']:
+                        hostname = h['name']
+                        hostname_type = h['type']
+                        csv_row = [
+                            host, hostname, hostname_type,
+                            proto, port,
+                            self[host][proto][port]['name'],
+                            self[host][proto][port]['state'],
+                            self[host][proto][port]['product'],
+                            self[host][proto][port]['extrainfo'],
+                            self[host][proto][port]['reason'],
+                            self[host][proto][port]['version'],
+                            self[host][proto][port]['conf'],
+                            self[host][proto][port]['cpe']
+                        ]
+                        csv_ouput.writerow(csv_row)
+
+        return fd.getvalue()
+
+############################################################################
 
 def __scan_progressive__(self, hosts, ports, arguments, callback, sudo):
     """
