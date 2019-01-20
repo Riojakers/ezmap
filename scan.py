@@ -1,57 +1,65 @@
 import core
 import csv
 import threading
+from io import StringIO
 class Scanner:
 	"""Clase con distintas funciones de escaneo de puertos"""
 	def __init__(self):
 		self.scanner = core.PortScanner()
 
-################### SERVICIO EN SEGUNDO PLANO ########################
+########################### SIMPLE SCANNER ###########################
 
-	def servicioHilo(self, target, port):
-		print("Se ha ejecutado el intermedio para: "+target+":"+port)
 
-######################################################################
-	def simpleTCP(self, target, port):
-		self.scanner.scan(target, port, '-sT')
-		estadoPuerto = self.scanner[target]['tcp'][int(port)]['state']
-		print(port+" "+estadoPuerto)
-		if estadoPuerto == 'open':
-			servicio = threading.Thread(target=self.servicioHilo, args=(target,port))
-			servicio.start()
-		# fichero = open("datos.csv","w")
-		# cadena = self.scanner.csv()
-		# fichero.write(cadena);
-		# fichero.close()
-		# fichero = open("datos.csv")
-		# csv_controlador = csv.reader(fichero, delimiter=';')
-		# header = csv_controlador.next()
-		# for fila in  csv_controlador:
-			# estadoPuerto = fila[6]
-			# numeroPuerto = fila[4]
-			# servicioPuerto = fila[5]
-			# print("Puerto: "+numeroPuerto+" Servicio: "+servicioPuerto+" Estado: "+("ABIERTO" if estadoPuerto == "open" else "CERRADO"))
-	def simpleUDP(self, target, port):
-		self.scanner.scan(target, port, '-sU')
-		print(self.scanner.csv())
-		print(self.scanner.command_line())
+	def simple(self, target, port, protocol):
+		#Choose parameter according to the protocol
+		parameter = ' '
+		if protocol == 'tcp':
+			parameter = '-sT'
+		else:
+			parameter = '-sU'
+
+		#Launches the scanner
+		self.scanner.scan(target, port, parameter)
 		
-###############################################################################################
-	def medioTCP(self, target, port):
-		self.scanner.scan(target, port, '-sV')
-		print(self.scanner.csv())
-		print(self.scanner.command_line())
-	def medioUDP(self, target, port):
-		self.scanner.scan(target, port, '-sUT')
-		print(self.scanner.csv())
-		print(self.scanner.command_line())
+		#Recover the state of the port
+		portState = self.scanner[target][protocol][int(port)]['state']
 
-###############################################################################################
-	def altoTCP(self, target, port):
-		self.scanner.scan(target, port, '-sCV')
-		print(self.scanner.csv())
-		print(self.scanner.command_line())
-	def altoUDP(self, target, port):
-		self.scanner.scan(target, port, '-sCU')
-		print(self.scanner.csv())
-		print(self.scanner.command_line())
+		#Returns a boolean according to the state of the port
+		if portState == 'open' or portState == 'open|filtered':
+			return True
+
+		return False
+
+########################### ADVANCE SCANNER ##########################
+
+	def start(self, target, port, protocol):
+		#Choose parameter according to the protocol
+		parameter = ' '
+		if protocol == 'tcp':
+			parameter = '-sV'
+		elif protocol == 'udp':
+			parameter = '-sUT'
+		elif protocol == 'tcpH':
+			parameter = '-sCV'
+		else:
+			parameter = '-sCU'
+
+		#Launches the scanner
+		self.scanner.scan(target, port, parameter)
+
+		#Format information to a String
+		cad_string = self.scanner.csv()
+		csv_controlador = csv.reader(cad_string.split('\n'), delimiter=';')
+		header = csv_controlador.next()
+		cad = ' '
+
+		#Return data
+		if protocol == 'tcp' or protocol == 'udp':
+			for row in csv_controlador:
+				if len(row) >= 12:
+					cad += 'Servicio: '+row[5]+' Version: '+row[10]+"\n "
+		else:
+			for row in csv_controlador:
+				if len(row) >= 12:
+					cad += ";".join(row)+"\n"
+		return cad

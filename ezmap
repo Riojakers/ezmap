@@ -6,15 +6,25 @@ from scan import Scanner
 # Base de datos donde se guardan los puertos abiertos
 dbTCP = {}
 dbUDP = {}
-commonPorts = ('135','902','80','443','21','22','25','80','110','143','443','587','3306','27017')
+commonPorts = ('21','22','25','135','902','80','110','143','443','587','3306','27017')
 
 def main(target):
 
     sc = Scanner()
-    
     for port in commonPorts:
-        sc.simpleTCP(target,port)
+        if sc.simple(target,port,'tcp') == True:
+        	print('Puerto TCP: '+port)
+        	print("------------TCP MEDIO------------")
+        	print(sc.start(target,port,'tcp'))
+        	print("------------TCP ALTO------------")
+        	print(sc.start(target,port,'tcpH'))
 
+        if sc.simple(target,port,'udp') == True:
+        	print('Puerto UDP: '+port)
+        	print("------------UDP MEDIO------------")
+        	print(sc.start(target,port,'udp'))
+        	print("------------UDP ALTO------------")
+        	print(sc.start(target,port,'udpH'))
         # escaners medios dsjoaghladsglkadsg
 
 
