@@ -3,21 +3,33 @@
 import core
 from scan import Scanner
 
-# Base de datos donde se guardan los puertos abiertos
-dbTCP = {}
-dbUDP = {}
-commonPorts = ('135','902','80','443','21','22','25','80','110','143','443','587','3306','27017')
+# VARIABLES GLOBALES
+commonPorts = ('8888','3306')
 
 def main(target):
+# Desde la función main se lanzan las tareas generales
+# All TCP ports
+	for port in commonPorts:
+		taskLauncher(target,port,'tcp')
 
-    sc = Scanner()
-    
-    for port in commonPorts:
-        sc.simpleTCP(target,port)
+	for port in commonPorts:
+		taskLauncher(target,port,'udp')
 
-        # escaners medios dsjoaghladsglkadsg
+
+def taskLauncher(target,port,protocol):
+	sc = Scanner()
+	if(sc.simple(target,port,protocol)):
+		dataManager(target, port, protocol, 'medium',sc.start(target,port,protocol))
+		dataManager(target, port, protocol, 'high', sc.start(target,port,protocol+'H'))
+
+
+def dataManager(target,port,protocol, task, data):
+	# escritura de datos
+	print(data)
+
+# def screenManager():
 
 
 if __name__ == '__main__':
-    target = '127.0.0.1'
-    main(target)
+	target = '127.0.0.1'
+	main(target)
