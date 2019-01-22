@@ -9,8 +9,6 @@ class Scanner:
 		self.scanner = core.PortScanner()
 
 ########################### SIMPLE SCANNER ###########################
-
-
 	def simple(self, target, port, protocol):
 		#Choose parameter according to the protocol
 		parameter = ' '
